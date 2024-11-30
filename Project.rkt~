@@ -14,7 +14,7 @@
 
          ;; For simple arithmatic and relational operators
          [(hash-has-key? env op)
-           (apply (hash-ref env op) (map (lambda (arg) (mainStartEval arg Table)) args))]
+           (apply (hash-ref env op) (map mainStartEval args Table))]
 
          ;; For conditonal if statement
          [(equal? op 'if)
@@ -25,7 +25,7 @@
           )]
 
          ;; For constants for variables we will look up in namespace
-         [(equal? op 'quote) (args)]
+         [(equal? op 'quote) (cadr expr)]
 
          [(equal? op 'car) (car (mainStartEval (cadr expr) Table))]
 
@@ -41,13 +41,12 @@
          [(equal? op 'lambda)
                (list 'closure (cadr expr) (caddr expr))]
 
-         
          [else (error "Some thing wrong")]))]
 
     [else (error "Some thing wrong")]))
 
 (define ( processFunction params body) #t)
 
-(define (startEval sourceCode) (mainStartEval sourceCode '()))
+(define (startEval sourceCode) mainStartEval (sourceCode '()))
 
 (startEval '(((+ 2 1))))
