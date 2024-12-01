@@ -6,20 +6,25 @@
   (cond
     [(number? expr) expr]
     [(pair? expr)
-     (letrec ([op (car expr)]
-              [args (cdr expr)]
-              [fromTable (tableOperator? op Table)])
+     (letrec ([op (tableOperator? (car expr) Table)]
+              [args (cdr expr)])
        (cond
          
          [(pair? op) (mainStartEval op Table)]
          
          ;; For evaluating nested Lists expressions such as '(((+ x 1)))
-         [(not (equal? #f fromTable)) fromTable]
+         [(number? op) op]
 
           ;; For simple arithmatic and relational operators
-         [(hash-has-key? env op)
-           (apply (hash-ref env op) (map (lambda (arg) (mainStartEval arg Table)) args))]
-
+         [(equal? op '+) (+ (mainStartEval (car args) Table) (mainStartEval (cadr args) Table))]
+         [(equal? op '-) (- (mainStartEval (car args) Table) (mainStartEval (cadr args) Table))]
+         [(equal? op '*) (* (mainStartEval (car args) Table) (mainStartEval (cadr args) Table))]
+         [(equal? op '/) (/ (mainStartEval (car args) Table) (mainStartEval (cadr args) Table))]
+         [(equal? op '=) (= (mainStartEval (car args) Table) (mainStartEval (cadr args) Table))]
+         [(equal? op '<=) (<= (mainStartEval (car args) Table) (mainStartEval (cadr args) Table))]
+         [(equal? op '<) (< (mainStartEval (car args) Table) (mainStartEval (cadr args) Table))]
+         [(equal? op '>=) (>= (mainStartEval (car args) Table) (mainStartEval (cadr args) Table))]
+         [(equal? op '>) (> (mainStartEval (car args) Table) (mainStartEval (cadr args) Table))]
          
          ;; For conditonal if statement
          [(equal? op 'if)
@@ -48,25 +53,25 @@
 
         [(equal? op 'let) (mainStartEval (cdr args) (append (car args) Table))]
 
-        g[(equal? op 'letrec) (mainStartEval (cdr args) (append (car args) Table))]
+        [(equal? op 'letrec) (mainStartEval (cdr args) (append (car args) Table))]
 
         [else (error "Something wrong")]))]
-        [(let ([fromTable (tableOperator? expr Table)])
-      (not (equal? fromTable #f)) (car fromTable))]
-    [else (error "Some thing wrong")]))
+    [else (tableOperator? expr Table)]))
 
 
 
 (define (tableOperator? op Table)
   (cond
-    [(null? Table) #f] ; If the list is empty, return #f
+    [(null? Table) op] ; If the list is empty, return op
     [(pair? (car Table)) ; If the current element is a pair (like '(x 2))
      (if (equal? (caar Table) op) ; Compare the car of the car with the op
-         (cdar Table) ; Return the value (cdr of car)
+         (car (cdar Table)) ; Return the value (cdr of car)
          (tableOperator? op (cdr Table)))] ; Recurse to the next element
     [else (tableOperator? op (cdr Table))])) ; Else, continue searching
 
 
 (define (startEval sourceCode) (mainStartEval sourceCode '()))
 
-(startEval '(let ([x 2] [y 2]) (+ x y)))
+(tableOperator? 'y '((x 2) (y 4)))
+(startEval '(letrec ([y 1] [x 2]) (+ x y)))
+(startEval '(letrec ([* +]) (* 5 5)))
