@@ -52,7 +52,8 @@
         [(equal? op 'letrec) (append (mainStartEval args Table) Table)]
 
         [else (error "Something wrong")]))]
-
+    [ (let ([fromTable (tableOperator? expr Table)])
+      (not (equal? fromTable #f)) (car fromTable))]
     [else (error "Some thing wrong")]))
 
 
@@ -60,9 +61,10 @@
 (define (tableOperator? op Table)
   (if (null? Table)
       #f  ; Return #f if the table is empty (operator not found)
-      (if (equal? op (car (car Table))) (cdr (car Table)) (tableOperator? op (cdr Table)))))
+      (if (equal? op (car (car Table))) (cdr (car Table))
+          (if (pair ))(tableOperator? op (cdr Table)))))
 
 
 (define (startEval sourceCode) (mainStartEval sourceCode '()))
 
-(startEval '(let [x 2] (+ x 1)))
+(startEval '(let ([x 2]) (+ x 1)))
