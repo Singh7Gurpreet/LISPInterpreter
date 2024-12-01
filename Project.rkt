@@ -10,14 +10,11 @@
               [args (cdr expr)]
               [fromTable (tableOperator? op Table)])
        (cond
-
-
+         
          [(pair? op) (mainStartEval op Table)]
          
          ;; For evaluating nested Lists expressions such as '(((+ x 1)))
-         [(not(equal? #f fromTable)) fromTable]
-
-         [(equal? op 'let) (mainStartEval (cdr args) (append (list (car args)) Table))]
+         [(not (equal? #f fromTable)) fromTable]
 
           ;; For simple arithmatic and relational operators
          [(hash-has-key? env op)
@@ -49,22 +46,27 @@
         [(equal? op 'lambda)
                (list 'closure (cadr expr) (caddr expr))]
 
-        [(equal? op 'letrec) (append (mainStartEval args Table) Table)]
+        [(equal? op 'let) (mainStartEval (cdr args) (append (car args) Table))]
+
+        g[(equal? op 'letrec) (mainStartEval (cdr args) (append (car args) Table))]
 
         [else (error "Something wrong")]))]
-    [ (let ([fromTable (tableOperator? expr Table)])
+        [(let ([fromTable (tableOperator? expr Table)])
       (not (equal? fromTable #f)) (car fromTable))]
     [else (error "Some thing wrong")]))
 
 
 
 (define (tableOperator? op Table)
-  (if (null? Table)
-      #f  ; Return #f if the table is empty (operator not found)
-      (if (equal? op (car (car Table))) (cdr (car Table))
-          (if (pair ))(tableOperator? op (cdr Table)))))
+  (cond
+    [(null? Table) #f] ; If the list is empty, return #f
+    [(pair? (car Table)) ; If the current element is a pair (like '(x 2))
+     (if (equal? (caar Table) op) ; Compare the car of the car with the op
+         (cdar Table) ; Return the value (cdr of car)
+         (tableOperator? op (cdr Table)))] ; Recurse to the next element
+    [else (tableOperator? op (cdr Table))])) ; Else, continue searching
 
 
 (define (startEval sourceCode) (mainStartEval sourceCode '()))
 
-(startEval '(let ([x 2]) (+ x 1)))
+(startEval '(let ([x 2] [y 2]) (+ x y)))
