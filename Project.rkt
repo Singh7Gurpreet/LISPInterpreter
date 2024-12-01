@@ -16,15 +16,9 @@
          [(number? op) op]
 
           ;; For simple arithmatic and relational operators
-         [(equal? op '+) (+ (mainStartEval (car args) Table) (mainStartEval (cadr args) Table))]
-         [(equal? op '-) (- (mainStartEval (car args) Table) (mainStartEval (cadr args) Table))]
-         [(equal? op '*) (* (mainStartEval (car args) Table) (mainStartEval (cadr args) Table))]
-         [(equal? op '/) (/ (mainStartEval (car args) Table) (mainStartEval (cadr args) Table))]
-         [(equal? op '=) (= (mainStartEval (car args) Table) (mainStartEval (cadr args) Table))]
-         [(equal? op '<=) (<= (mainStartEval (car args) Table) (mainStartEval (cadr args) Table))]
-         [(equal? op '<) (< (mainStartEval (car args) Table) (mainStartEval (cadr args) Table))]
-         [(equal? op '>=) (>= (mainStartEval (car args) Table) (mainStartEval (cadr args) Table))]
-         [(equal? op '>) (> (mainStartEval (car args) Table) (mainStartEval (cadr args) Table))]
+         [(hash-has-key? env op)
+           (apply (hash-ref env op) (map (lambda (arg) (mainStartEval arg Table)) args))]
+
          
          ;; For conditonal if statement
          [(equal? op 'if)
@@ -72,6 +66,5 @@
 
 (define (startEval sourceCode) (mainStartEval sourceCode '()))
 
-(tableOperator? 'y '((x 2) (y 4)))
 (startEval '(letrec ([y 1] [x 2]) (+ x y)))
-(startEval '(letrec ([* +]) (* 5 5)))
+(startEval '(letrec ([+ *]) (+ 5 5)))
