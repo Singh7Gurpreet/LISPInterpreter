@@ -43,7 +43,8 @@
                      (cons arg1 arg2))]
          
         [(equal? op 'lambda)
-               (list 'closure (cadr expr) (caddr expr))]
+               ;; CADR EXPR = ARGS and CADDR EXPR = BODY
+               (list 'closure (cadr expr) (caddr expr) Table)]
 
         [(equal? op 'let) (mainStartEval (cdr args) (append (car args) Table))]
 
@@ -51,8 +52,6 @@
 
         [else (error "Something wrong")]))]
     [else (tableOperator? expr Table)]))
-
-
 
 (define (tableOperator? op Table)
   (cond
@@ -66,5 +65,11 @@
 
 (define (startEval sourceCode) (mainStartEval sourceCode '()))
 
-(startEval '(letrec ([y 1] [x 2]) (+ x y)))
-(startEval '(letrec ([+ *]) (+ 5 5)))
+;;(startEval '(letrec ([y 1] [x 2]) (+ x y)))
+;;(startEval '(letrec ([+ *]) (+ 5 5)))
+(startEval '(let ([x 5])
+  (let ([y 10])
+    (+ x y)))
+)
+(startEval '((lambda (x y) (+ x y)) 1 3))
+((lambda (x y) (+ x y)) 1 4)
