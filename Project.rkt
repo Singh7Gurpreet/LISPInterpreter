@@ -49,9 +49,9 @@
           ;;(mainStartEval (car (cdr args)) extendingTable Table (car args)))]
                ;; CADR EXPR = ARGS and CADDR EXPR = BODY
 
-        [(equal? op 'let) (mainStartEval (cdr args) (append (car args) Table))]
+        [(equal? op 'let) (mainStartEval (car (cdr args)) (append (car args) Table))]
 
-        [(equal? op 'letrec) (mainStartEval (cdr args) (append (car args) Table))]
+        [(equal? op 'letrec) (mainStartEval (car (cdr args)) (append (car args) Table))]
 
         [(list? op) (if (equal? (car op) 'lambda)
                          (let ([formalParams (car (cdr op))]
@@ -85,12 +85,13 @@
 
 (define (startEval sourceCode) (mainStartEval sourceCode '()))
 
-;;(startEval '(letrec ([y 1] [x 2]) (+ x y)))
-;;(startEval '(letrec ([+ *]) (+ 5 5)))
-;;(startEval '(let ([x 5])
-;;  (let ([y 10])
-;;    (+ x y)))
-;;)
+(startEval '(let ([+ *]) (+ 5 5)))
+
+(startEval '(letrec ([y 1] [x 2]) (+ x y)))
+(startEval '(let ([x 5])
+  (let ([y 10])
+    (+ x y)))
+)
 (startEval '((lambda (x y) (+ x y)) 1 3))
 ;;((lambda (x y) (+ x y)) 1 4)
 (startEval '(((lambda (x) (lambda (y) (+ x y)))1)2))
