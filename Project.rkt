@@ -20,14 +20,14 @@
          
          ;; For conditonal if statement
          [(equal? op 'if)
-          (let ([test (mainStartEval (car args))]
+          (let ([test (mainStartEval (car args) Table)]
                [alternate (mainStartEval (cadr args) Table)]
                [consequent (mainStartEval (caddr args) Table)])
           (if test alternate consequent)
           )]
 
          ;; For constants for variables we will look up in namespace
-         [(equal? op 'quote) (args)]
+         [(equal? op 'quote) args]
 
          [(equal? op 'car) (car (mainStartEval (cadr expr) Table))]
 
@@ -89,9 +89,16 @@
 
 (startEval '(letrec ([y 1] [x 2]) (+ x y)))
 (startEval '(let ([x 5])
-  (let ([y 10])
+(let ([y 10])
     (+ x y)))
 )
 (startEval '((lambda (x y) (+ x y)) 1 3))
-;;((lambda (x y) (+ x y)) 1 4)
+((lambda (x y) (+ x y)) 1 4)
 (startEval '(((lambda (x) (lambda (y) (+ x y)))1)2))
+#|(print
+(startEval
+'(letrec ((fact
+(lambda (x)
+(if (= x 0) (quote 1)
+(* x (fact (- x 1)))))))
+(fact 10))))|#
