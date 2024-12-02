@@ -10,7 +10,13 @@
               [args (cdr expr)])
        (cond
          
-         [(pair? op) (mainStartEval op Table)]
+         [(pair? op) (if (equal? (car op) 'lambda)
+                         (let ([formalParams (car (cdr op))]
+                               [actualParams args]
+                               [functionBody (car (cdr (cdr op)))])
+                          (mainStartEval functionBody (extendingTable Table formalParams actualParams)))
+                         ;;(printf "~a ~a ~a\n" formalParams actualParams functionBody))
+                         (mainStartEval op Table))]
          
          ;; For evaluating nested Lists expressions such as '(((+ x 1)))
          [(number? op) op]
@@ -62,14 +68,20 @@
          (tableOperator? op (cdr Table)))] ; Recurse to the next element
     [else (tableOperator? op (cdr Table))])) ; Else, continue searching
 
+(define (extendingTable Table formalParams actualParams)
+  (if (null? formalParams)
+      Table
+      (extendingTable (append (list (list (car formalParams) (car actualParams))) Table)
+                      (cdr formalParams)
+                      (cdr actualParams))))
 
 (define (startEval sourceCode) (mainStartEval sourceCode '()))
 
 ;;(startEval '(letrec ([y 1] [x 2]) (+ x y)))
 ;;(startEval '(letrec ([+ *]) (+ 5 5)))
-(startEval '(let ([x 5])
-  (let ([y 10])
-    (+ x y)))
-)
+;;(startEval '(let ([x 5])
+;;  (let ([y 10])
+;;    (+ x y)))
+;;)
 (startEval '((lambda (x y) (+ x y)) 1 3))
-((lambda (x y) (+ x y)) 1 4)
+;;((lambda (x y) (+ x y)) 1 4)
