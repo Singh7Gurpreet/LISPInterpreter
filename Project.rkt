@@ -9,15 +9,7 @@
      (letrec ([op (tableOperator? (car expr) Table)]
               [args (cdr expr)])
        (cond
-         
-         [(pair? op) (if (equal? (car op) 'lambda)
-                         (let ([formalParams (car (cdr op))]
-                               [actualParams args]
-                               [functionBody (car (cdr (cdr op)))])
-                          (mainStartEval functionBody (extendingTable Table formalParams actualParams)))
-                         ;;(printf "~a ~a ~a\n" formalParams actualParams functionBody))
-                         (mainStartEval op Table))]
-         
+         ;;(print expr)
          ;; For evaluating nested Lists expressions such as '(((+ x 1)))
          [(number? op) op]
 
@@ -48,13 +40,29 @@
                      [arg2 (mainStartEval (cadr args) Table)])
                      (cons arg1 arg2))]
          
-        [(equal? op 'lambda)
+         [(equal? op 'lambda)
+                         (let ([formalParams (car args)]
+                               [actualParams (list (car (cdr (cdr args))))]
+                               [functionBody (car (cdr args))])
+                               (mainStartEval functionBody (extendingTable Table formalParams actualParams))
+                           )]
+          ;;(mainStartEval (car (cdr args)) extendingTable Table (car args)))]
                ;; CADR EXPR = ARGS and CADDR EXPR = BODY
-               (list 'closure (cadr expr) (caddr expr) Table)]
 
         [(equal? op 'let) (mainStartEval (cdr args) (append (car args) Table))]
 
         [(equal? op 'letrec) (mainStartEval (cdr args) (append (car args) Table))]
+
+        [(list? op) (if (equal? (car op) 'lambda)
+                         (let ([formalParams (car (cdr op))]
+                               [actualParams args]
+                               [functionBody (car (cdr (cdr op)))])
+                          (mainStartEval functionBody (extendingTable Table formalParams actualParams)))
+                          (let* ([formalParams (car (cdr (car op)))]
+                                [actualParams args]
+                                [temp (cdr (cdr (car op)))]
+                                [functionBody (append (car temp) (cdr op))])
+                         (mainStartEval functionBody (extendingTable Table formalParams actualParams))))]
 
         [else (error "Something wrong")]))]
     [else (tableOperator? expr Table)]))
@@ -85,3 +93,4 @@
 ;;)
 (startEval '((lambda (x y) (+ x y)) 1 3))
 ;;((lambda (x y) (+ x y)) 1 4)
+(startEval '(((lambda (x) (lambda (y) (+ x y)))1)2))
