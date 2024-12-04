@@ -58,13 +58,12 @@
                                [actualParams args]
                                [functionBody (car (cdr (cdr op)))])
                           (mainStartEval functionBody (extendingTable Table formalParams actualParams)))
-                          #|(let* ([formalParams (car (cdr (car op)))]
+                          (let* ([formalParams (car (cdr (car op)))]
                                 [actualParams args]
                                 [temp (cdr (cdr (car op)))]
-                                [functionBody (append (car temp) (cdr op))])|#
-                         ;;(mainStartEval functionBody (extendingTable Table formalParams actualParams)))]
-                         (mainStartEval op Table)
-                         )]
+                                [functionBody (append (car temp) (cdr op))])
+                         (mainStartEval functionBody (extendingTable Table formalParams actualParams))))]
+      
 
         [else (error "Something wrong")]))]
     [else (tableOperator? expr Table)]))
