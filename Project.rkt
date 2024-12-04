@@ -15,7 +15,7 @@
 
           ;; For simple arithmatic and relational operators
          [(hash-has-key? env op)
-           (apply (hash-ref env op) (map (lambda (arg) (mainStartEval arg Table)) args))]
+           (apply (hash-ref env op) (map (lambda arg (mainStartEval arg Table)) args))]
 
          
          ;; For conditonal if statement
@@ -58,11 +58,13 @@
                                [actualParams args]
                                [functionBody (car (cdr (cdr op)))])
                           (mainStartEval functionBody (extendingTable Table formalParams actualParams)))
-                          (let* ([formalParams (car (cdr (car op)))]
+                          #|(let* ([formalParams (car (cdr (car op)))]
                                 [actualParams args]
                                 [temp (cdr (cdr (car op)))]
-                                [functionBody (append (car temp) (cdr op))])
-                         (mainStartEval functionBody (extendingTable Table formalParams actualParams))))]
+                                [functionBody (append (car temp) (cdr op))])|#
+                         ;;(mainStartEval functionBody (extendingTable Table formalParams actualParams)))]
+                         (mainStartEval op Table)
+                         )]
 
         [else (error "Something wrong")]))]
     [else (tableOperator? expr Table)]))
@@ -79,13 +81,16 @@
 (define (extendingTable Table formalParams actualParams)
   (if (null? formalParams)
       Table
-      (extendingTable (append (list (list (car formalParams) (car actualParams))) Table)
-                      (cdr formalParams)
-                      (cdr actualParams))))
+      (extendingTable 
+       (append (list (list (car formalParams) (mainStartEval (car actualParams) Table))) 
+               Table)
+       (cdr formalParams)
+       (cdr actualParams))))
+
 
 (define (startEval sourceCode) (mainStartEval sourceCode '()))
 
-(startEval '(let ([+ *]) (+ 5 5)))
+#|(startEval '(let ([+ *]) (+ 5 5)))
 
 (startEval '(letrec ([y 1] [x 2]) (+ x y)))
 (startEval '(let ([x 5])
@@ -93,12 +98,12 @@
     (+ x y)))
 )
 (startEval '((lambda (x y) (+ x y)) 1 3))
-((lambda (x y) (+ x y)) 1 4)
-(startEval '(((lambda (x) (lambda (y) (+ x y)))1)2))
-#|(print
+(startEval '(((lambda (x) (lambda (y) (+ x y)))1)2))|#
+
+(print
 (startEval
 '(letrec ((fact
 (lambda (x)
 (if (= x 0) (quote 1)
 (* x (fact (- x 1)))))))
-(fact 10))))|#
+(fact 1))))
