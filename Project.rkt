@@ -74,7 +74,7 @@
     [(null? Table) op] ; If the list is empty, return op
     [(pair? (car Table)) ; If the current element is a pair (like '(x 2))
      (if (equal? (caar Table) op) ; Compare the car of the car with the op
-         (car (cdar Table)) ; Return the value (cdr of car)
+         (mainStartEval (car (cdar Table)) Table) ; Return the value (cdr of car)
          (tableOperator? op (cdr Table)))] ; Recurse to the next element
     [else (tableOperator? op (cdr Table))])) ; Else, continue searching
 
@@ -90,7 +90,7 @@
 
 (define (startEval sourceCode) (mainStartEval sourceCode '()))
 
-(startEval '(let ([+ *]) (+ 5 5)))
+#|(startEval '(let ([+ *]) (+ 5 5)))
 
 (startEval '(letrec ([y 1] [x 2]) (+ x y)))
 (startEval '(let ([x 5])
@@ -98,8 +98,6 @@
     (+ x y)))
 )
 (startEval '((lambda (x y) (+ x y)) 1 3))
-(startEval '(((lambda (x) (lambda (y) (+ x y)))1)2))
-
 (print
 (startEval
 '(letrec ((fact
@@ -107,3 +105,6 @@
 (if (= x 0) (quote 1)
 (* x (fact (- x 1)))))))
 (fact 10))))
+(startEval '(((lambda (x) (lambda (y) (+ x y)))1)2))
+(startEval '(letrec ((x (- 9 5))(e (* 3 1))) (* e 5)))
+|#
