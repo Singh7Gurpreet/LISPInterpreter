@@ -9,16 +9,12 @@
      (letrec ([op (tableOperator? (car expr) Table)]
               [args (cdr expr)])
        (cond
-         ;;(print expr)
-         ;; For evaluating nested Lists expressions such as '(((+ x 1)))
          [(number? op) op]
 
-          ;; For simple arithmatic and relational operators
          [(hash-has-key? env op)
            ((hash-ref env op) (mainStartEval (car args) Table) (mainStartEval (car (cdr args)) Table))]
 
          
-         ;; For conditonal if statement
          [(equal? op 'if)
           (if (mainStartEval (car args) Table)
                (mainStartEval (cadr args) Table)
@@ -27,9 +23,18 @@
          ;; For constants for variables we will look up in namespace
          [(equal? op 'quote) (car args)]
 
-         [(equal? op 'car) (car (mainStartEval (cadr expr) Table))]
+         [(equal? op 'car) (let ([variable (mainStartEval (cadr expr) Table)])
+                             (if (list? variable) (car variable)
+                                 variable
+                                 )
+                             )]
 
-         [(equal? op 'cdr) (cdr (mainStartEval (cadr expr) Table))]
+         [(equal? op 'cdr) 
+ (let ([variable (mainStartEval (cadr expr) Table)])
+   (if (list? variable) 
+       (cdr variable)
+       variable))]
+
 
          [(equal? op 'pair?) (pair? (mainStartEval (cadr expr) Table))]
 
@@ -39,7 +44,7 @@
                      (cons arg1 arg2))]
          
          [(equal? op 'lambda)
-                          (if (null? (cadddr expr)) (write 'lambda)
+                          (if (null? (cdddr expr)) (printf "~a\n" 'lambda)
                           (mainStartEval (caddr expr) (extendingTable Table  (cadr expr) (list (cadddr expr)))))
           ]
           ;;(mainStartEval (car (cdr args)) extendingTable Table (car args)))]
@@ -75,10 +80,13 @@
     [(null? Table) op] ; If the list is empty, return op
     [(pair? (car Table)) ; If the current element is a pair (like '(x 2))
      (if (equal? (caar Table) op) ; Compare the car of the car with the op
-         ;;(mainStartEval (car (cdar Table)) Table) ; Return the value (cdr of car)
-         (car (cdar Table))
+         (let ([value (car (cdar Table))]) ; Get the value from the pair
+           (if (and (pair? value) (equal? (car value) 'lambda)) ; Check if it's a lambda
+               (list value) ; Return the lambda function as-is
+               (mainStartEval value Table))) ; Otherwise, evaluate the value
          (tableOperator? op (cdr Table)))] ; Recurse to the next element
     [else (tableOperator? op (cdr Table))])) ; Else, continue searching
+
 
 (define (extendingTable Table formalParams actualParams)
   (if (null? formalParams)
@@ -108,7 +116,6 @@
 (startEval
   '(letrec ((fib
             (lambda (n) (if (<= n 1) 1 (+ (fib (- n 1)) (fib (- n 2)))))))
-
            (fib 7))
  )
 
@@ -122,7 +129,8 @@
                    (- '(1 2 3 4 5)))
                (+ -))
  )
-
+(startEval '(letrec ((x (- 9 5))(e (* 3 1))) (* e 5)))
+(startEval '(lambda (x) (+ x 1)))
 
 (startEval '(((lambda (x) (lambda (y) (+ x y)))1)2))
 (print
