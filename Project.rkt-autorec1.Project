@@ -39,8 +39,8 @@
                      (cons arg1 arg2))]
          
          [(equal? op 'lambda)
-                          (if (null? (cadddr expr)) (write 'lambda)
-                          (mainStartEval (caddr expr) (extendingTable Table  (cadr expr) (list (cadddr expr)))))
+                          (print (cddaddr expr))
+                          (mainStartEval (caddr expr) (extendingTable Table  (cadr expr) (list (cadddr expr))))
           ]
           ;;(mainStartEval (car (cdr args)) extendingTable Table (car args)))]
                ;; CADR EXPR = ARGS and CADDR EXPR = BODY
@@ -75,8 +75,7 @@
     [(null? Table) op] ; If the list is empty, return op
     [(pair? (car Table)) ; If the current element is a pair (like '(x 2))
      (if (equal? (caar Table) op) ; Compare the car of the car with the op
-         ;;(mainStartEval (car (cdar Table)) Table) ; Return the value (cdr of car)
-         (car (cdar Table))
+         (mainStartEval (car (cdar Table)) Table) ; Return the value (cdr of car)
          (tableOperator? op (cdr Table)))] ; Recurse to the next element
     [else (tableOperator? op (cdr Table))])) ; Else, continue searching
 
@@ -92,44 +91,22 @@
 
 (define (startEval sourceCode) (mainStartEval sourceCode '()))
 
-
-
+#|
 (startEval '(let ([+ *]) (+ 5 5)))
-
 (startEval '(letrec ([y 1] [x 2]) (+ x y)))
-
 (startEval '(let ([x 5])
 (let ([y 10])
     (+ x y)))
 )
-
 (startEval '((lambda (x y) (+ x y)) 1 3))
-
-(startEval
-  '(letrec ((fib
-            (lambda (n) (if (<= n 1) 1 (+ (fib (- n 1)) (fib (- n 2)))))))
-
-           (fib 7))
- )
-
-(startEval
-  '(let ((y 10))
-     (let ((f (lambda (x) (+ x y))))
-       (let ((y 100))
-         (f 2)))))
-
-(startEval '(let ((+ (lambda (x) (cdr x)))
-                   (- '(1 2 3 4 5)))
-               (+ -))
- )
-
-
 (startEval '(((lambda (x) (lambda (y) (+ x y)))1)2))
+|#
+
+
 (print
 (startEval
 '(letrec ((fact
 (lambda (x)
 (if (= x 0) (quote 1)
 (* x (fact (- x 1)))))))
-(fact 10))))
-
+(fact 1))))
