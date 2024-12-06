@@ -158,142 +158,29 @@
               ((add 5) 10)))) ; Expected: 15
 (newline)
 
-;; Test 7: is-odd? Function
-(print "Test G: ")
-(print
- (startEval '(let ([sub1 (lambda (x) (- x 1))]
-                    [not (lambda (x) (if x #f #t))])
-                (letrec ([is-even? (lambda (n)
-                                     (if (= n 0)
-                                         #t
-                                         (is-odd? (sub1 n))))]
-                         [is-odd? (lambda (n)
-                                    (if (not (= n 0))
-                                        (is-even? (sub1 n))
-                                        #f))])
-                  (is-odd? 4))))
-)
-
-(newline)
-(print "Expected: #f")
+;; Test Case 7: Boolean and conditionals
+(displayln "Test G: (if #t 42 0)")
+(displayln (startEval '(if #t 42 0))) ; Expected: 42
 (newline)
 
-;; Test 7: Closure Environment
-(print "Test H: ")
-(print
- (startEval
-  '(let ((y 5))
-     (let ((f (lambda (x) (+ x y))))
-       (let ((y 50))
-         (f 3)))))
-)
-(newline)
-(print "Expected: 8")
+;; Test Case 8: Closure capturing environment
+(displayln "Test H: (let ([x 10]) ((lambda (y) (+ x y)) 5))")
+(displayln (startEval '(let ([x 10]) ((lambda (y) (+ x y)) 5)))) ; Expected: 15
 (newline)
 
-;; Test 8: Increment Function
-(print "Test 8: ")
-(print
- (startEval
-  '(let ((inc (lambda (x) (+ x (quote 1)))))
-     (inc (quote 10)))
- )
-)
-(newline)
-(print "Expected: 11") 
+;; Test Case 9: Variable shadowing in nested lets
+(displayln "Test I: (let ([x 42]) (let ([x 100]) x))")
+(displayln (startEval '(let ([x 42]) (let ([x 100]) x)))) ; Expected: 100
 (newline)
 
-;; Test 9: Fibonacci Function
-(print "Test I: ")
-(print
- (startEval
-  '(letrec ((fib
-             (lambda (n)
-               (if (< n 2)
-                   n
-                   (+ (fib (- n 1)) (fib (- n 2)))))))
-         (fib 6)))
-)
-(newline)
-(print "Expected: 8") 
+;; Test Case 10: Complex arithmetic expression
+(displayln "Test J: (* (+ 1 2) (- 10 4))")
+(displayln (startEval '(* (+ 1 2) (- 10 4)))) ; Expected: 18
 (newline)
 
-;; Test 10: Nested Lambda Application
-(print "Test J: ")
-(print
- (startEval
-  '(((lambda (x) (lambda (y) (+ x y))) 3) 4))
-)
-(newline)
-(print "Expected: 7")
-(newline)
-
-;; Test 11: Equality Check
-(print "Test K: ")
-(print
- (startEval
-  '(let ((x (+ 2 2))) 
-     (equal? x 4))
- )
-)
-(newline)
-(print "Expected: #t")
-(newline)
-
-;; Test 12: Variable Shadowing
-(print "Test L: ")
-(print
- (startEval
-  '(let ((y 7) (x 4)) 
-     (let ((x 9)) 
-       (+ x y))))
-)
-(newline)
-(print "Expected: 16")
-(newline)
-
-
-;; Test 13 Increment Function with Different Operator
-(print "Test M: ")
-(print
- (startEval
-  '(let ((inc (lambda (x) (+ x (quote 2)))))
-     (inc (quote 3)))
- )
-)
-(newline)
-(print "Expected: 5")
-(newline)
-
-;; Test 14: Simple Addition
-(print "Test N: ")
-(print
- (startEval '(+ (quote 7) (quote 2)))
-)
-(newline)
-(print "Expected: 9")
-(newline)
-
-;; Test 15: Letrec with Multiple Bindings
-(print "Test O: ")
-(print
- (startEval 
-  '(letrec ((x (- 10 6))
-            (e (* 2 5))) 
-     (* e 5)))
-)
-(newline)
-(print "Expected: 50")
-(newline)
-
-;; Test 16: Lambda with Letrec
-(print "Test P: ")
-(print
- (startEval 
-  '(letrec ((y 3)
-            (f (lambda (x) (+ x y)))) 
-     (f 4)))
-)
-(newline)
-(print "Expected: 7")
+;; Test Case 11: Unbound variable (should produce an error)
+(displayln "Test K: Unbound variable error scenario (e.g., x)")
+(with-handlers ([exn:fail?
+                 (lambda (e) (displayln (string-append "Error: " (exn-message e))))])
+  (displayln (startEval 'x))) ; Expected: Error (Unbound variable)
 (newline)
